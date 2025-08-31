@@ -1,0 +1,30 @@
+# Кеш модели Roboflow
+roboflow_cache/
+models.pkl
+
+# Временные файлы обработки
+tmp/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

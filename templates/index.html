@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовый стенд</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-container">
+            <!-- Analysis Mode Tabs -->
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="parts" onclick="switchTab('parts', this)">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Сегментация деталей
+                </button>
+                <button class="mode-tab" data-mode="damage" onclick="switchTab('damage', this)">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    Сегментация повреждений
+                </button>
+                <button class="mode-tab" data-mode="full-union" onclick="switchTab('full-union', this)">
+                    <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    Полное объединение
+                </button>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="upload-section">
+                <div id="drop-zone" class="upload-zone">
+                    <div class="upload-zone-content">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                            </svg>
+                        </div>
+                        <div class="upload-text">
+                            <p id="drop-text" class="primary-text" title="Поддерживаются форматы: JPG, PNG, BMP, TIFF, WebP (макс. 10MB)">Перетащите изображение автомобиля сюда</p>
+                            <p class="secondary-text">или <span id="file-select" class="file-select-link" title="Выбрать файлы для обработки">выберите файл</span></p>
+                        </div>
+                        <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div id="progress-container" class="progress-container" style="display: none;">
+                <div class="progress-header">
+                    <span id="progress-text">Обработка изображений...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Parallel Processing Indicator -->
+            <div id="parallel-indicator" class="processing-indicator" style="display: none;">
+                <span class="spinner"></span>
+                <span id="parallel-text">Параллельная обработка файлов...</span>
+            </div>
+
+            <!-- Results Gallery -->
+            <div id="results-gallery" class="results-gallery" style="display: none;">
+                <div class="gallery-header">
+                    <h3>Результаты анализа</h3>
+                    <div class="gallery-controls">
+                        <button id="export-excel" class="btn-primary" title="Экспортировать все результаты в Excel">📊 Экспорт Excel</button>
+                        <button id="clear-results" class="btn-secondary" title="Удалить все обработанные изображения из галереи">Очистить все</button>
+                    </div>
+                </div>
+                <div id="results-grid" class="results-grid">
+                    <!-- Results will be added here dynamically -->
+                </div>
+            </div>
+
+            <!-- Error Messages -->
+            <div id="error" class="error-message" style="display: none;">
+                <div class="error-content">
+                    <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <div class="error-text">
+                        <h4>Ошибка обработки</h4>
+                        <p id="error-message"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+
+
+    <!-- Modal Window -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title" class="modal-title">Просмотр изображения</h3>
+                <button id="modal-close" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image-container">
+                    <img id="modal-image" class="modal-image" src="" alt="Просмотр">
+                </div>
+                <div class="modal-info">
+                    <div class="modal-info-section">
+                        <h4 class="modal-info-title">Тип анализа</h4>
+                        <div class="modal-buttons">
+                            <button id="btn-original" class="modal-btn active" title="Показать оригинальное изображение без обработки">Показать оригинал</button>
+                            <button id="btn-overlay" class="modal-btn" title="Показать изображение с готовой разметкой">Показать с разметкой</button>
+                            <button id="btn-interactive" class="modal-btn" title="Показать интерактивные полигоны и лейблы">Интерактивные полигоны</button>
+                            <button id="btn-mask" class="modal-btn" title="Показать только цветные маски без фона">Показать только маску</button>
+                        </div>
+                    </div>
+                    <div class="modal-info-section">
+                        <div class="polygon-controls-header">
+                            <h4 class="modal-info-title">Управление полигонами</h4>
+                            <button id="reset-labels-btn" class="reset-labels-btn" onclick="resetInteractiveLabelsPositions()" title="Вернуть лейблы в исходные позиции на полигонах">
+                                🔄 Сбросить
+                            </button>
+                        </div>
+                        <div id="polygon-buttons" class="polygon-buttons-grid">
+                            <!-- Кнопки полигонов будут добавлены динамически -->
+                        </div>
+                    </div>
+                    <div class="modal-info-section">
+                        <h4 class="modal-info-title">Информация</h4>
+                        <p id="modal-filename">Название файла</p>
+                        <p id="modal-timestamp">Время обработки</p>
+                        <p id="modal-mode">Тип: Детали</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
