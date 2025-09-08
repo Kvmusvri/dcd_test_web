@@ -37,6 +37,19 @@
 - **Модель коррозии** (corrosion-hsmae): обнаружение поверхностной коррозии
 - **Результат**: фильтрация по разрешенным классам с маппингом на русские названия
 
+## Используемые модели Roboflow
+
+### Детали автомобиля
+- [Parts-car](https://universe.roboflow.com/computacional-vision/parts-car) - колеса, шины, крыша
+- [Car-parts-ulbml](https://universe.roboflow.com/yolov11projects/car-parts-ulbml) - двери, фары, зеркала
+- [Cars-parts-and-damages](https://universe.roboflow.com/workspace-cars/cars-parts-and-damages_3) - основные элементы кузова
+
+### Повреждения автомобиля
+- [Car-damage-detection-frmnl](https://universe.roboflow.com/capstone-project-xj0qf/car-damage-detection-frmnl) - трещины, царапины, вмятины
+- [Car-damage-detection-vyhvw](https://universe.roboflow.com/auto-industry/car-damage-detection-vyhvw) - повреждения кузова
+- [Bilgi-university-car-damage](https://universe.roboflow.com/het-m73ej/bilgi-university-car-damage) - складки, утрата фрагментов
+- [Corrosion-hsmae](https://universe.roboflow.com/universitas-diponegoro-rfxta/corrosion-hsmae) - поверхностная коррозия
+
 ### Генерация отчетов
 - **Excel структура**: два листа (ДЕТАЛИ, ПОВРЕЖДЕНИЯ)
 - **Группировка**: по именам файлов с разделением предсказаний
@@ -79,29 +92,14 @@
 - Вмятина
 - Поверхностная коррозия
 
-## API эндпоинты
-
-- `GET /` - главная страница
-- `POST /upload` - обработка деталей автомобиля
-- `POST /upload_damage` - обработка повреждений
-- `POST /upload_full_union` - полное объединение (детали + повреждения)
-- `GET /export/excel/all` - экспорт всех результатов
-- `GET /export/excel/{file_id}` - экспорт результата одного файла
-- `GET /models/status` - статус моделей
-
-## Технологии
-
-- **Backend**: FastAPI, Python 3.8+
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **ML**: Roboflow API, Supervision, OpenCV
-- **Визуализация**: PIL, NumPy
-- **Отчеты**: OpenPyXL
 
 ## Запуск
+
+В корневой папке проекта
 
 ```bash
 pip install -r requirements.txt
 python main.py
 ```
 
-Приложение будет доступно на http://localhost:8001
+Приложение будет доступно на http://localhost:5000
