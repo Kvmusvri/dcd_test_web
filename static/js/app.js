@@ -49,6 +49,7 @@ let dragOffset = { x: 0, y: 0 };
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 DCD Vision initialized');
     updateModeTabs();
+    updateMobileButtonText(); // Инициализируем текст мобильной кнопки
 
     // Initialize model status checking
     startModelStatusChecking();
@@ -135,6 +136,45 @@ function updateDropText() {
             dropText.innerHTML = 'Перетащите изображение автомобиля сюда для анализа повреждений';
         } else if (currentMode === 'full-union') {
             dropText.innerHTML = 'Перетащите изображение автомобиля сюда для полного объединения всех моделей';
+        }
+    }
+    
+    // Обновляем текст мобильной кнопки
+    updateMobileButtonText();
+}
+
+// Update mobile button text based on current mode
+function updateMobileButtonText() {
+    const mobileFileText = document.getElementById('mobile-file-text');
+    const mobileFileButton = document.getElementById('mobile-file-button');
+    
+    if (mobileFileText) {
+        if (currentMode === 'parts') {
+            mobileFileText.textContent = 'Выберите файл для анализа деталей';
+        } else if (currentMode === 'damage') {
+            mobileFileText.textContent = 'Выберите файл для анализа повреждений';
+        } else if (currentMode === 'full-union') {
+            mobileFileText.textContent = 'Выберите файл для полного объединения';
+        } else {
+            mobileFileText.textContent = 'Выберите файл';
+        }
+    }
+    
+    // Обновляем цвет кнопки в зависимости от режима
+    if (mobileFileButton) {
+        // Удаляем все классы режимов
+        mobileFileButton.classList.remove('mode-parts', 'mode-damage', 'mode-full-union');
+        
+        // Добавляем класс текущего режима
+        if (currentMode === 'parts') {
+            mobileFileButton.classList.add('mode-parts');
+        } else if (currentMode === 'damage') {
+            mobileFileButton.classList.add('mode-damage');
+        } else if (currentMode === 'full-union') {
+            mobileFileButton.classList.add('mode-full-union');
+        } else {
+            // По умолчанию используем режим parts
+            mobileFileButton.classList.add('mode-parts');
         }
     }
 }
@@ -241,6 +281,17 @@ if (fileInput) {
 const fileSelectLink = document.getElementById('file-select');
 if (fileSelectLink) {
     fileSelectLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (fileInput) {
+            fileInput.click();
+        }
+    });
+}
+
+// Mobile file button handler
+const mobileFileButton = document.getElementById('mobile-file-button');
+if (mobileFileButton) {
+    mobileFileButton.addEventListener('click', (e) => {
         e.preventDefault();
         if (fileInput) {
             fileInput.click();

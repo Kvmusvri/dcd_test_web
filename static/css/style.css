@@ -251,6 +251,42 @@ body {
     color: var(--primary-dark);
 }
 
+/* Mobile Upload Button */
+.mobile-file-button {
+    display: none; /* Скрыта по умолчанию на десктопе */
+}
+
+/* Цвета мобильной кнопки для разных режимов */
+.mobile-file-button.mode-parts {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.mobile-file-button.mode-parts:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+}
+
+.mobile-file-button.mode-damage {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.mobile-file-button.mode-damage:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.5);
+}
+
+.mobile-file-button.mode-full-union {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.mobile-file-button.mode-full-union:hover {
+    background: linear-gradient(135deg, #5b21b6, #4c1d95);
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.5);
+}
+
 /* Results Gallery */
 .results-gallery {
     background-color: var(--surface-color);
@@ -1160,7 +1196,69 @@ body {
     }
 
     .upload-zone {
-        padding: 2rem 1rem;
+        display: none; /* Скрываем DND зону на мобильных */
+    }
+
+    /* Показываем мобильную кнопку на мобильных устройствах */
+    .mobile-file-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 1.25rem 1.5rem;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .mobile-file-button:hover {
+        transform: translateY(-2px);
+    }
+
+    .mobile-file-button:active {
+        transform: translateY(0);
+    }
+
+    .mobile-button-icon {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+    }
+
+    /* Цвета мобильной кнопки для разных режимов в мобильной версии */
+    .mobile-file-button.mode-parts {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .mobile-file-button.mode-parts:hover {
+        background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.5);
+    }
+
+    .mobile-file-button.mode-damage {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    }
+
+    .mobile-file-button.mode-damage:hover {
+        background: linear-gradient(135deg, #b91c1c, #991b1b);
+        box-shadow: 0 6px 16px rgba(220, 38, 38, 0.5);
+    }
+
+    .mobile-file-button.mode-full-union {
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    .mobile-file-button.mode-full-union:hover {
+        background: linear-gradient(135deg, #5b21b6, #4c1d95);
+        box-shadow: 0 6px 16px rgba(124, 58, 237, 0.5);
     }
 
     .primary-text {
