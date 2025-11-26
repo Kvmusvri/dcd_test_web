@@ -169,6 +169,8 @@ function handleFiles(files) {
 
     if (imageFiles.length === 0) {
         showError('Не найдено подходящих изображений');
+        // Сбрасываем состояние даже при ошибке
+        resetUploadState();
         return;
     }
 
@@ -176,6 +178,8 @@ function handleFiles(files) {
     const oversizedFiles = imageFiles.filter(file => file.size > 10 * 1024 * 1024);
     if (oversizedFiles.length > 0) {
         showError('Один или несколько файлов слишком большие (макс. 10MB)');
+        // Сбрасываем состояние даже при ошибке
+        resetUploadState();
         return;
     }
 
@@ -227,6 +231,19 @@ if (fileInput) {
         const files = Array.from(e.target.files);
         if (files.length > 0) {
             handleFiles(files);
+            // Очищаем input после обработки, чтобы можно было выбирать тот же файл снова
+            fileInput.value = '';
+        }
+    });
+}
+
+// File select link handler
+const fileSelectLink = document.getElementById('file-select');
+if (fileSelectLink) {
+    fileSelectLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (fileInput) {
+            fileInput.click();
         }
     });
 }
@@ -468,8 +485,44 @@ function checkProcessingComplete() {
     if (!hasQueued && !hasProcessing && isProcessingQueue) {
         isProcessingQueue = false;
         hideParallelIndicator();
-        console.log('✅ All files processing completed');
+
+        // Сбрасываем состояние для возможности новых загрузок
+        resetUploadState();
+
+        console.log('✅ All files processing completed - ready for new uploads');
     }
+}
+
+// Function to reset upload state for new file uploads
+function resetUploadState() {
+    // Очищаем input файл, если он еще не очищен
+    if (fileInput) {
+        fileInput.value = '';
+    }
+
+    // Сбрасываем любые визуальные индикаторы загрузки
+    hideProgress();
+
+    // Убеждаемся, что drag-and-drop зона активна
+    if (dropZone) {
+        dropZone.style.opacity = '1';
+        dropZone.style.pointerEvents = 'auto';
+
+        // Добавляем небольшой визуальный индикатор готовности
+        dropZone.classList.add('ready-for-upload');
+        setTimeout(() => {
+            dropZone.classList.remove('ready-for-upload');
+        }, 1000);
+    }
+
+    // Очищаем очередь обработки, если все файлы завершены
+    if (processingQueue.every(item => item.status === 'completed' || item.status === 'error')) {
+        console.log('🧹 Очищаем завершенную очередь обработки');
+        processingQueue.length = 0; // Очищаем массив
+        fileIdCounter = 0; // Сбрасываем счетчик
+    }
+
+    console.log('🔄 Upload state reset - ready for new files');
 }
 
 async function processNextInQueue() {
@@ -526,6 +579,9 @@ async function processNextInQueue() {
             console.error(`❌ Error processing ${fileItem.file.name}:`, error);
             fileItem.status = 'error';
             fileItem.error = error.message;
+
+            // Показываем ошибку пользователю
+            showError(`Ошибка обработки файла ${fileItem.file.name}: ${error.message}`);
         }
 
         updateFileStatus(fileItem);

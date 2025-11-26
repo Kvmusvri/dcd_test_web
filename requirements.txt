@@ -1,28 +1,18 @@
 # Основные зависимости для веб-приложения
-fastapi==0.104.1
-uvicorn==0.24.0
-python-multipart==0.0.6
-jinja2==3.1.2
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+python-multipart==0.0.17
+jinja2==3.1.4
 
 # Для работы с изображениями
-Pillow==10.1.0
-opencv-python==4.8.1.78
-numpy==1.26.2
+Pillow==11.0.0
+opencv-python==4.10.0.84
+numpy==1.26.4
 
 # Для работы с Excel
-openpyxl==3.1.2
+openpyxl==3.1.5
 
 # Для работы с Roboflow
-roboflow==1.1.19
-supervision==0.17.1
-
-# Системные зависимости
-asyncio
-threading
-datetime
-os
-glob
-io
-base64
-contextlib
+roboflow==1.1.49
+supervision==0.25.1
 

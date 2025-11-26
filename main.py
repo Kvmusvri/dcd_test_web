@@ -1611,11 +1611,31 @@ def create_text_report(data, filename="damage_report.xlsx"):
 
 if __name__ == "__main__":
     print("📡 Сервер будет доступен по адресу: http://0.0.0.0:8001")
+    print("🔄 Автоматическая перезагрузка включена - изменения в коде применятся автоматически")
     print("🛑 Для остановки нажмите Ctrl+C")
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8001,
-        reload=False,
-        log_level="info"
-    )
+
+    # Используем subprocess для запуска uvicorn с reload через строку импорта
+    import subprocess
+    import sys
+
+    try:
+        # Запускаем uvicorn как subprocess с правильными параметрами для reload
+        cmd = [
+            sys.executable, "-m", "uvicorn",
+            "main:app",  # Строка импорта вместо объекта
+            "--host", "0.0.0.0",
+            "--port", "8001",
+            "--reload",  # Включаем reload
+            "--reload-dir", ".",  # Мониторим текущую директорию
+            "--log-level", "info"
+        ]
+
+        print(f"🚀 Запуск команды: {' '.join(cmd)}")
+        subprocess.run(cmd, check=True)
+
+    except KeyboardInterrupt:
+        print("\n🛑 Сервер остановлен пользователем")
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Ошибка запуска сервера: {e}")
+    except Exception as e:
+        print(f"❌ Непредвиденная ошибка: {e}")
