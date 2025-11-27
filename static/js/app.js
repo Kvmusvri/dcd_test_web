@@ -51,6 +51,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateModeTabs();
     updateMobileButtonText(); // Инициализируем текст мобильной кнопки
 
+    // Initialize parallel indicator close functionality
+    initParallelIndicatorClose();
+
     // Initialize model status checking
     startModelStatusChecking();
 
@@ -475,7 +478,6 @@ function addFileToUI(fileItem) {
             <div class="progress-bar-small">
                 <div class="progress-fill-small" style="width: ${fileItem.progress}%"></div>
             </div>
-            <div class="progress-text">${fileItem.progress}%</div>
         </div>
         <div class="file-actions">
             <button class="cancel-btn" onclick="cancelFile(${fileItem.id})" title="Отменить обработку этого файла">
@@ -705,7 +707,6 @@ function updateFileStatus(fileItem) {
 
     const statusBadge = fileItem.element.querySelector('.status-badge');
     const progressFill = fileItem.element.querySelector('.progress-fill-small');
-    const progressText = fileItem.element.querySelector('.progress-text');
 
     if (statusBadge) {
         statusBadge.className = `status-badge status-${fileItem.status}`;
@@ -714,10 +715,6 @@ function updateFileStatus(fileItem) {
 
     if (progressFill) {
         progressFill.style.width = `${fileItem.progress}%`;
-    }
-
-    if (progressText) {
-        progressText.textContent = `${fileItem.progress}%`;
     }
 
     // Hide progress for completed/error files
@@ -742,6 +739,7 @@ function updateFileStatus(fileItem) {
         }
     }
 }
+
 
 function getStatusText(status) {
     switch (status) {
@@ -816,6 +814,7 @@ function showParallelIndicator(processingCount = 0) {
     if (parallelIndicator && parallelText) {
         parallelText.textContent = `Параллельная обработка: ${processingCount} файлов одновременно`;
         parallelIndicator.style.display = 'flex';
+        parallelIndicator.classList.add('processing');
     }
 }
 
@@ -823,6 +822,7 @@ function hideParallelIndicator() {
     const parallelIndicator = document.getElementById('parallel-indicator');
     if (parallelIndicator) {
         parallelIndicator.style.display = 'none';
+        parallelIndicator.classList.remove('processing');
     }
 }
 
@@ -833,6 +833,52 @@ function updateParallelIndicator(count) {
         showParallelIndicator(count);
     } else {
         hideParallelIndicator();
+    }
+}
+
+// Initialize parallel indicator close functionality
+function initParallelIndicatorClose() {
+    const parallelIndicator = document.getElementById('parallel-indicator');
+    const parallelCloseBtn = document.getElementById('parallel-close');
+
+    // Close button handler
+    if (parallelCloseBtn) {
+        parallelCloseBtn.addEventListener('click', function() {
+            hideParallelIndicator();
+        });
+    }
+
+    // Swipe handler for mobile devices
+    if (parallelIndicator && 'ontouchstart' in window) {
+        let startX = 0;
+        let startY = 0;
+        let isSwiping = false;
+
+        parallelIndicator.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            isSwiping = false;
+        });
+
+        parallelIndicator.addEventListener('touchmove', function(e) {
+            if (!startX || !startY) return;
+
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const diffX = Math.abs(currentX - startX);
+            const diffY = Math.abs(currentY - startY);
+
+            // Detect swipe (horizontal movement > vertical, and > 50px)
+            if (diffX > diffY && diffX > 50) {
+                isSwiping = true;
+            }
+        });
+
+        parallelIndicator.addEventListener('touchend', function(e) {
+            if (isSwiping) {
+                hideParallelIndicator();
+            }
+        });
     }
 }
 
@@ -2016,7 +2062,13 @@ function makeLabelDraggable(labelElement) {
     let hasMoved = false; // Флаг для определения, было ли значительное движение
 
     // Добавляем обработчик клика для переключения видимости
+    // Click handler for desktop (touch devices use touchend)
     labelElement.addEventListener('click', function(e) {
+        // Skip click on touch devices - they use touchend instead
+        if ('ontouchstart' in window) {
+            return;
+        }
+
         console.log(`🖱️ Клик по лейблу: ${labelElement.dataset.polygonId}, hasMoved=${hasMoved}`);
 
         // Не обрабатываем клик если было значительное перетаскивание
@@ -2107,6 +2159,95 @@ function makeLabelDraggable(labelElement) {
             isDragging = false;
         }, 10);
     }
+
+    // Touch event handlers for mobile devices
+    labelElement.addEventListener('touchstart', function(e) {
+        // Don't prevent default here to allow click events
+        e.stopPropagation();
+
+        if (e.touches.length !== 1) return; // Only handle single touch
+
+        isDragging = false;
+        hasMoved = false;
+        isDraggingLabel = true;
+        draggedLabel = labelElement;
+
+        const rect = labelElement.getBoundingClientRect();
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        dragOffset.x = touch.clientX - rect.left;
+        dragOffset.y = touch.clientY - rect.top;
+
+        initialX = rect.left;
+        initialY = rect.top;
+
+        document.addEventListener('touchmove', dragLabelTouch, { passive: false });
+        document.addEventListener('touchend', stopDraggingTouch);
+
+        // Add dragging class for visual feedback
+        labelElement.classList.add('dragging');
+    });
+
+    function dragLabelTouch(e) {
+        if (!isDraggingLabel || !draggedLabel || e.touches.length !== 1) return;
+
+        // Only prevent default if we're actually dragging
+        const touch = e.touches[0];
+        const deltaX = Math.abs(touch.clientX - startX);
+        const deltaY = Math.abs(touch.clientY - startY);
+
+        if (deltaX > 5 || deltaY > 5) {
+            e.preventDefault(); // Only prevent when dragging
+            hasMoved = true;
+            isDragging = true;
+        }
+
+        if (hasMoved) {
+            // Получаем позицию модального контейнера
+            const modalRect = modalImage.closest('.modal-image-container').getBoundingClientRect();
+
+            // Рассчитываем позицию относительно модального контейнера
+            const newX = touch.clientX - modalRect.left - dragOffset.x;
+            const newY = touch.clientY - modalRect.top - dragOffset.y;
+
+            // Ограничиваем лейбл в пределах модального окна
+            const maxX = modalRect.width - draggedLabel.offsetWidth;
+            const maxY = modalRect.height - draggedLabel.offsetHeight;
+
+            const clampedX = Math.max(0, Math.min(newX, maxX));
+            const clampedY = Math.max(0, Math.min(newY, maxY));
+
+            draggedLabel.style.left = `${clampedX}px`;
+            draggedLabel.style.top = `${clampedY}px`;
+        }
+    }
+
+    function stopDraggingTouch(e) {
+        if (draggedLabel) {
+            draggedLabel.classList.remove('dragging');
+        }
+
+        // If we didn't move much, treat it as a click
+        if (!hasMoved && draggedLabel) {
+            const polygonId = draggedLabel.dataset.polygonId;
+            if (polygonId) {
+                console.log(`👆 Touch click на лейбле: ${polygonId}`);
+                togglePolygonByLabel(polygonId);
+            }
+        }
+
+        isDraggingLabel = false;
+        draggedLabel = null;
+        document.removeEventListener('touchmove', dragLabelTouch);
+        document.removeEventListener('touchend', stopDraggingTouch);
+
+        // Сбрасываем флаг через небольшой таймаут
+        setTimeout(() => {
+            isDragging = false;
+            hasMoved = false;
+        }, 10);
+    }
 }
 
 function clearInteractiveLabels() {
@@ -2117,11 +2258,14 @@ function clearInteractiveLabels() {
         // Останавливаем все обработчики событий на лейблах перед удалением
         const labels = labelsContainer.querySelectorAll('.interactive-label');
         labels.forEach(label => {
-            // Удаляем все обработчики событий
+            // Удаляем все обработчики событий (mouse и touch)
             label.onclick = null;
             label.onmousedown = null;
             label.onmouseup = null;
             label.onmousemove = null;
+            label.ontouchstart = null;
+            label.ontouchmove = null;
+            label.ontouchend = null;
         });
 
         labelsContainer.innerHTML = '';
